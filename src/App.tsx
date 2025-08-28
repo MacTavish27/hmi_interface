@@ -140,7 +140,7 @@ function App() {
       <Text
         color={fire_data ? "red" : "green"}
         position="absolute"
-        top="92%"
+        top="91%"
         left="13%"
       >
         Fire status: {fire_data?.fire ? "Firing!" : "OK"}
@@ -148,7 +148,7 @@ function App() {
       <Text
         color={leak_data ? "red" : "green"}
         position="absolute"
-        top="92%"
+        top="94%"
         left="13%"
       >
         Leak status: {leak_data?.leak ? "Leaking!" : "OK"}
