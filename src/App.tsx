@@ -5,7 +5,7 @@ import Indicator from "./components/Indicator";
 import Property from "./components/Property";
 import PumpStatus from "./components/PumpStatus";
 import {
-  getFireData,
+  getData,
   getModel,
   getSim,
   postModel,
@@ -14,6 +14,7 @@ import {
 import type {
   FireStatus,
   FullModelResponse,
+  LeakStatus,
   ProcessData,
 } from "./services/api-client";
 import ProcessButton from "./components/ProcessButton";
@@ -22,7 +23,8 @@ import { Text } from "@chakra-ui/react";
 function App() {
   const [data, setData] = useState<FullModelResponse | null>(null);
   const [sim_data, setSimData] = useState<ProcessData | null>(null);
-  const [fire_data, setFireData] = useState<FireStatus | undefined>(undefined);
+  const [fire_data, setFireData] = useState<FireStatus | null>(null);
+  const [leak_data, setLeakData] = useState<LeakStatus | null>(null);
 
   const [isStarted, setStarted] = useState(false);
   const [isLeaked, setLeaked] = useState(false);
@@ -35,12 +37,12 @@ function App() {
 
   const Leak_trigger = () => {
     setLeaked(!isLeaked);
-    postStart("/scenario/leak");
+    postStart("scenario/leak");
   };
 
   useEffect(() => {
-    const fetchAll = () => {
-      getModel()
+    const fetchAll = async () => {
+      await getModel()
         .then(setData)
         .catch((err) => console.error("Model fetch failed", err));
 
@@ -50,11 +52,10 @@ function App() {
           .catch((err) => console.error("Sim fetch failed", err));
       }
 
-      if (isLeaked) {
-        getFireData("/scenario/fire_status'")
-          .then(setFireData)
-          .catch((err) => console.error("Fire fetch failed", err));
-      }
+      const fireData = await getData<FireStatus>("scenario/fire_status");
+      setFireData(fireData);
+      const leakData = await getData<LeakStatus>("scenario/status");
+      setLeakData(leakData);
     };
 
     fetchAll();
@@ -137,12 +138,20 @@ function App() {
         onClick={Leak_trigger}
       />
       <Text
-        color={fire_data?.fire ? "red" : "green"}
+        color={fire_data ? "red" : "green"}
         position="absolute"
         top="92%"
         left="13%"
       >
         Fire status: {fire_data?.fire ? "Firing!" : "OK"}
+      </Text>
+      <Text
+        color={leak_data ? "red" : "green"}
+        position="absolute"
+        top="92%"
+        left="13%"
+      >
+        Leak status: {leak_data?.leak ? "Leaking!" : "OK"}
       </Text>
       <Text fontSize="14px" position="absolute" top="30%" left="8%">
         {sim_data?.Source}

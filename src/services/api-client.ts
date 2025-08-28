@@ -44,6 +44,9 @@ export interface FireStatus {
   fire: boolean;
 }
 
+export interface LeakStatus {
+  leak: boolean;
+}
 export interface FullModelResponse {
   [key: string]: ValveData | PumpData | VesselData;
 }
@@ -56,7 +59,7 @@ export const getModel = async (): Promise<FullModelResponse> => {
 export const postModel = async (
   tag: string,
   attribute: string,
-  value: number
+  value: number | boolean
 ): Promise<void> => {
   await axios.post(`${BASE_URL}/${tag}`, { attribute, value });
 };
@@ -70,7 +73,17 @@ export const getSim = async (endpoint: string): Promise<ProcessData> => {
   return response.data;
 };
 
-export const getFireData = async (endpoint: string): Promise<FireStatus> => {
-  const response = await axios.get<FireStatus>(`${url}/${endpoint}`);
+export const getData = async <T>(endpoint: string): Promise<T> => {
+  const response = await axios.get<T>(`${url}/${endpoint}`);
   return response.data;
 };
+
+// export const getFireData = async (endpoint: string): Promise<FireStatus> => {
+//   const response = await axios.get<FireStatus>(`${url}/${endpoint}`);
+//   return response.data;
+// };
+
+// export const getLeakData = async (endpoint: string): Promise<LeakStatus> => {
+//   const response = await axios.get<LeakStatus>(`${url}/${endpoint}`);
+//   return response.data;
+// };
