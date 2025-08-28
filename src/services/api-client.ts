@@ -40,6 +40,10 @@ export interface ProcessData {
   Outlet: string;
 }
 
+export interface FireStatus {
+  fire: boolean;
+}
+
 export interface FullModelResponse {
   [key: string]: ValveData | PumpData | VesselData;
 }
@@ -57,11 +61,16 @@ export const postModel = async (
   await axios.post(`${BASE_URL}/${tag}`, { attribute, value });
 };
 
-export const postStart = async (tag: string): Promise<void> => {
-  await axios.post(`${url}/${tag}`);
+export const postStart = async (endpoint: string): Promise<void> => {
+  await axios.post(`${url}/${endpoint}`);
 };
 
-export const getSim = async (): Promise<ProcessData> => {
-  const response = await axios.get<ProcessData>(`${url}/sim`);
+export const getSim = async (endpoint: string): Promise<ProcessData> => {
+  const response = await axios.get<ProcessData>(`${url}/${endpoint}`);
+  return response.data;
+};
+
+export const getFireData = async (endpoint: string): Promise<FireStatus> => {
+  const response = await axios.get<FireStatus>(`${url}/${endpoint}`);
   return response.data;
 };

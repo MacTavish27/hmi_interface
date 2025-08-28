@@ -4,10 +4,11 @@ interface Props {
   top: string;
   left: string;
   status: boolean;
+  content: string;
   onClick: () => void;
 }
 
-const ProcessButton = ({ left, top, status, onClick }: Props) => {
+const ProcessButton = ({ left, top, status, onClick, content }: Props) => {
   return (
     <Button
       position="absolute"
@@ -19,7 +20,7 @@ const ProcessButton = ({ left, top, status, onClick }: Props) => {
       h="60px"
       bgColor={status ? "red" : "green"}
     >
-      {status ? "Stop" : "Start"}
+      {content}
     </Button>
   );
 };

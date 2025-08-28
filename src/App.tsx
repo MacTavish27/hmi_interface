@@ -4,20 +4,38 @@ import Background from "./components/Background";
 import Indicator from "./components/Indicator";
 import Property from "./components/Property";
 import PumpStatus from "./components/PumpStatus";
-import { getModel, getSim, postModel, postStart } from "./services/api-client";
-import type { FullModelResponse, ProcessData } from "./services/api-client";
+import {
+  getFireData,
+  getModel,
+  getSim,
+  postModel,
+  postStart,
+} from "./services/api-client";
+import type {
+  FireStatus,
+  FullModelResponse,
+  ProcessData,
+} from "./services/api-client";
 import ProcessButton from "./components/ProcessButton";
 import { Text } from "@chakra-ui/react";
 
 function App() {
   const [data, setData] = useState<FullModelResponse | null>(null);
   const [sim_data, setSimData] = useState<ProcessData | null>(null);
+  const [fire_data, setFireData] = useState<FireStatus | undefined>(undefined);
 
   const [isStarted, setStarted] = useState(false);
+  const [isLeaked, setLeaked] = useState(false);
+
   const handleClick = () => {
     setStarted(!isStarted);
     const message = isStarted ? "stop" : "start";
     postStart(message);
+  };
+
+  const Leak_trigger = () => {
+    setLeaked(!isLeaked);
+    postStart("/scenario/leak");
   };
 
   useEffect(() => {
@@ -27,16 +45,22 @@ function App() {
         .catch((err) => console.error("Model fetch failed", err));
 
       if (isStarted) {
-        getSim()
+        getSim("/sim")
           .then(setSimData)
           .catch((err) => console.error("Sim fetch failed", err));
+      }
+
+      if (isLeaked) {
+        getFireData("/scenario/fire_status'")
+          .then(setFireData)
+          .catch((err) => console.error("Fire fetch failed", err));
       }
     };
 
     fetchAll();
     const intervalId = setInterval(fetchAll, 1000);
     return () => clearInterval(intervalId);
-  }, [isStarted]);
+  }, [isStarted, isLeaked]);
 
   const getValvePVValue = (id: string) =>
     data && id in data
@@ -101,8 +125,25 @@ function App() {
         top="15%"
         left="80%"
         status={isStarted}
+        content={isStarted ? "Stop" : "Start"}
         onClick={handleClick}
       />
+
+      <ProcessButton
+        top="90%"
+        left="4%"
+        status={isLeaked}
+        content={isLeaked ? "Stop" : "Leak"}
+        onClick={Leak_trigger}
+      />
+      <Text
+        color={fire_data?.fire ? "red" : "green"}
+        position="absolute"
+        top="92%"
+        left="13%"
+      >
+        Fire status: {fire_data?.fire ? "Firing!" : "OK"}
+      </Text>
       <Text fontSize="14px" position="absolute" top="30%" left="8%">
         {sim_data?.Source}
       </Text>
