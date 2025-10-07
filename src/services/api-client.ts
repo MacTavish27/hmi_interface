@@ -68,22 +68,7 @@ export const postStart = async (endpoint: string): Promise<void> => {
   await axios.post(`${url}/${endpoint}`);
 };
 
-export const getSim = async (endpoint: string): Promise<ProcessData> => {
-  const response = await axios.get<ProcessData>(`${url}/${endpoint}`);
-  return response.data;
-};
-
 export const getData = async <T>(endpoint: string): Promise<T> => {
   const response = await axios.get<T>(`${url}/${endpoint}`);
   return response.data;
 };
-
-// export const getFireData = async (endpoint: string): Promise<FireStatus> => {
-//   const response = await axios.get<FireStatus>(`${url}/${endpoint}`);
-//   return response.data;
-// };
-
-// export const getLeakData = async (endpoint: string): Promise<LeakStatus> => {
-//   const response = await axios.get<LeakStatus>(`${url}/${endpoint}`);
-//   return response.data;
-// };

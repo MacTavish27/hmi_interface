@@ -4,18 +4,15 @@ import Background from "./components/Background";
 import Indicator from "./components/Indicator";
 import Property from "./components/Property";
 import PumpStatus from "./components/PumpStatus";
-import {
-  getData,
-  getModel,
-  getSim,
-  postModel,
-  postStart,
-} from "./services/api-client";
+import { getData, getModel, postModel, postStart } from "./services/api-client";
 import type {
   FireStatus,
   FullModelResponse,
   LeakStatus,
   ProcessData,
+  PumpData,
+  ValveData,
+  VesselData,
 } from "./services/api-client";
 import ProcessButton from "./components/ProcessButton";
 import { Text } from "@chakra-ui/react";
@@ -47,7 +44,7 @@ function App() {
         .catch((err) => console.error("Model fetch failed", err));
 
       if (isStarted) {
-        getSim("/sim")
+        await getData<ProcessData>("/sim")
           .then(setSimData)
           .catch((err) => console.error("Sim fetch failed", err));
       }
@@ -65,24 +62,25 @@ function App() {
 
   const getValvePVValue = (id: string) =>
     data && id in data
-      ? ((data[id] as any).pv * 100).toFixed(0).toString()
+      ? ((data[id] as ValveData).pv * 100).toFixed(0).toString()
       : undefined;
 
   const getValveOPValue = (id: string) =>
     data && id in data
-      ? ((data[id] as any).op * 100).toFixed(0).toString()
+      ? ((data[id] as ValveData).op * 100).toFixed(0).toString()
       : undefined;
 
   const getIndicatorValue = () =>
     data && "vessel1" in data
-      ? (data["vessel1"] as any).v_liquid / (data["vessel1"] as any).v_total
+      ? (data["vessel1"] as VesselData).v_liquid /
+        (data["vessel1"] as VesselData).v_total
       : 0;
 
   const getPressureValue = () =>
-    data && "vessel1" in data ? (data["vessel1"] as any).p_total : 0;
+    data && "vessel1" in data ? (data["vessel1"] as VesselData).p_total : 0;
 
   const getPumpStatus = (id: string) =>
-    data && id in data ? (data[id] as any).op > 0 : false;
+    data && id in data ? (data[id] as PumpData).op > 0 : false;
 
   const setOp = (tag: string, value: number) => {
     postModel(tag, "set_op", value);
@@ -113,7 +111,7 @@ function App() {
 
       <Indicator
         value={getIndicatorValue() * 100}
-        pressure={getPressureValue().toFixed(2)}
+        pressure={Number(getPressureValue().toFixed(2))}
       />
       <PumpStatus status={getPumpStatus("p1")} top="59%" left="53.6%" id="p1" />
       <PumpStatus
@@ -138,7 +136,7 @@ function App() {
         onClick={Leak_trigger}
       />
       <Text
-        color={fire_data ? "red" : "green"}
+        color={fire_data?.fire ? "red" : "green"}
         position="absolute"
         top="91%"
         left="13%"
@@ -146,7 +144,7 @@ function App() {
         Fire status: {fire_data?.fire ? "Firing!" : "OK"}
       </Text>
       <Text
-        color={leak_data ? "red" : "green"}
+        color={leak_data?.leak ? "red" : "green"}
         position="absolute"
         top="94%"
         left="13%"

@@ -2,9 +2,9 @@ import { Box, VStack, Text } from "@chakra-ui/react";
 
 interface Props {
   value: number;
-  pressure?: number;
+  pressure: number;
 }
-const Indicator = ({ value, pressure = 2 }: Props) => {
+const Indicator = ({ value, pressure }: Props) => {
   return (
     <>
       <Text left="32%" top="28%" position="absolute" fontSize="14px">
